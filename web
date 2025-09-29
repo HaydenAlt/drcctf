@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[GHOST PROTOCOL :: SECURE TERMINAL]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-asm.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #0a0a0a;
+            color: #00ff41;
+            text-shadow: 0 0 5px #00ff41, 0 0 10px rgba(0, 255, 65, 0.3);
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5) 1px, transparent 1px, transparent 3px);
+            z-index: 10;
+            pointer-events: none;
+            animation: flicker 0.15s infinite;
+        }
+        
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.5) 80%);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.8; }
+            50% { opacity: 0.9; }
+            100% { opacity: 0.8; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .terminal-container {
+            animation: fadeIn 1s ease-out forwards;
+            background: rgba(10, 25, 10, 0.2);
+            border: 2px solid rgba(0, 255, 65, 0.5);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .text-glow {
+            color: #33ff33;
+            text-shadow: 0 0 8px #33ff33;
+        }
+
+        .text-dim {
+            color: rgba(0, 255, 65, 0.7);
+            text-shadow: none;
+        }
+
+        input, button, #results-container {
+            background-color: transparent;
+            border: 1px solid rgba(0, 255, 65, 0.5);
+            color: #00ff41;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #00ff41;
+            box-shadow: 0 0 10px #00ff41;
+        }
+
+        button {
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background-color: #00ff41;
+            color: #0a0a0a;
+            text-shadow: none;
+            box-shadow: 0 0 15px #00ff41;
+        }
+        
+        #query-display {
+            border: 1px dashed rgba(0, 255, 65, 0.3);
+            color: rgba(0, 255, 65, 0.6);
+            padding: 0.5rem;
+        }
+        
+        #results-container table {
+            border-collapse: collapse;
+        }
+
+        #results-container th, #results-container td {
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            padding: 0.5rem;
+            text-align: left;
+        }
+        
+        #results-container thead {
+             color: #33ff33;
+        }
+
+        #error-container {
+            color: #ff4141;
+            border-color: #ff4141;
+            text-shadow: 0 0 5px #ff4141;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="terminal-container w-full max-w-4xl mx-auto rounded-none mb-8">
+        <div class="p-6 border-b-2 border-dashed border-[rgba(0,255,65,0.5)]">
+            <h1 class="text-3xl font-bold text-glow">[Sector 7G Comms Log]</h1>
+            <p class="text-dim mt-2">// Accessing archived chat logs from isolated network sector...<br>// Anomaly detected in user activity. Proceed with caution.</p>
+        </div>
+
+        <div class="p-6">
+            <label for="query-input" class="block mb-2 text-dim">> Search logs by user:</label>
+            <input type="text" id="query-input" class="mono w-full p-2">
+            <button id="execute-query-button" class="mt-4 w-full py-2 px-4">
+                Execute Query
+            </button>
+            <div id="query-display" class="mono mt-4 min-h-[40px]">> SELECT * FROM chat WHERE username = '$input'</div>
+        </div>
+
+        <div class="p-6">
+            <h2 class="text-2xl font-semibold text-glow mb-3">> Query Results_</h2>
+            <div id="results-container" class="p-4 min-h-[250px] max-h-[50vh] overflow-auto mono">
+                <p class="text-dim">Awaiting command...</p>
+            </div>
+            <div id="error-container" class="hidden mt-4 p-4 mono"></div>
+        </div>
+    </div>
+
+    <script>
+	// Nice job in finding the JavaScript code!
+	// However, this challenge is about SQL injection, not reading the source code and reverse engineering.
+	// Besides, this part of the code will normally be stored in a remote server, and not accessible here.
+	// This challenge is an exception to save time and resources.
+	// Well, the flag is encrypted here, as my last line of defense... 
+	// If you paid attention during the cryptography part and understand a bit of JavaScript...
+	// I think you could easily obtain the flag!
+	// But seriously, I think listening to me and doing the injection is faster lor... 
+	// So please focus on me!!! Even if I made you bored... Or you think you are smart... Or whatever...
+	// -Hayden
+        const queryInput = document.getElementById('query-input');
+        const executeQueryButton = document.getElementById('execute-query-button');
+        const resultsContainer = document.getElementById('results-container');
+        const errorContainer = document.getElementById('error-container');
+        const queryDisplay = document.getElementById('query-display');
+
+        let db; 
+
+        async function initializeDatabase() {
+            try {
+                const SQL = await initSqlJs({
+                    locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}`
+                });
+
+                db = new SQL.Database();
+                
+                db.run("CREATE TABLE chat (id INTEGER PRIMARY KEY, username TEXT, content TEXT);");
+                
+                const conversationSnippets = [
+                    { user: 'alpha_agent', line: 'Package delivered to drop point ZULU. No complications.' },
+                    { user: 'shadow_spectre', line: 'Copy that, Alpha. Did you sweep for tails?' },
+                    { user: 'alpha_agent', line: 'Affirmative. The area was clean. Moving to extraction.' },
+                    { user: 'cipher_lynx', line: 'Intel from Nightingale is solid. The target will be at the gala.' },
+                    { user: 'ghost_operative', line: 'I\'ll handle infiltration. What\'s the exfil plan?' },
+                    { user: 'cipher_lynx', line: 'Rooftop, west wing. Chopper ETA 2300 hours.' },
+                    { user: 'tech_wraith', line: 'New comms scrambler is online. It\'s untraceable.' },
+                    { user: 'shadow_spectre', line: 'Let\'s hope it holds. Their counter-intel is getting better.' },
+                    { user: 'tech_wraith', line: 'I have confidence in my work. It routes through a dozen dead-end servers.' },
+                    { user: 'alpha_agent', line: 'Encountered a minor snag. One of their patrols was off-schedule.' },
+                    { user: 'ghost_operative', line: 'Were you spotted?' },
+                    { user: 'alpha_agent', line: 'Negative. The new cloaking device worked. They walked right past.' },
+                    { user: 'cipher_lynx', line: 'Need confirmation on the asset\'s identity. The photo was corrupted.' },
+                    { user: 'shadow_spectre', line: 'He has a scar above his left eye. That\'s the primary identifier.' },
+                    { user: 'tech_wraith', line: 'I\'m decrypting their internal network now... this is taking longer than expected.' },
+                    { user: 'ghost_operative', line: 'Anything I can do to help?' },
+                    { user: 'tech_wraith', line: 'Just keep the network stable from your end. I\'m almost through the last firewall.' },
+                    { user: 'alpha_agent', line: 'Extraction successful. Awaiting next directive.' },
+                    { user: 'cipher_lynx', line: 'Stand by, Alpha. New orders coming through a secure channel.' },
+                    { user: 'shadow_spectre', line: 'Remember the protocol for compromised agents. No loose ends.' },
+                    { user: 'ghost_operative', line: 'Understood. The mission comes first.' },
+                    { user: 'tech_wraith', line: 'I\'m in. Accessing their personnel files now.' },
+                    { user: 'cipher_lynx', line: 'Find everything you can on \'Project Chimera\'.' },
+                    { user: 'alpha_agent', line: 'This new gadget is impressive. The sonic neutralizer works like a charm.' },
+                    { user: 'shadow_spectre', line: 'Don\'t get cocky. Over-reliance on tech is a liability.' },
+                    { user: 'tech_wraith', line: 'Found something... It looks like a manifest for a shipment.' },
+                    { user: 'cipher_lynx', line: 'What are the contents?' },
+                    { user: 'tech_wraith', line: 'It\'s heavily encrypted. The label is just "Payload".' },
+                    { user: 'ghost_operative', line: 'Could be the Chimera prototype. I\'m moving into position.' },
+                    { user: 'shadow_spectre', line: 'Hold your position, Ghost. We don\'t move without confirmation.' },
+                    { user: 'alpha_agent', line: 'Agreed. A false move could compromise the entire network.' },
+                    { user: 'cipher_lynx', line: 'Tech, can you crack the encryption on that manifest?' },
+                    { user: 'tech_wraith', line: 'I can try, but it will take time and might trip their alarms.' },
+                    { user: 'shadow_spectre', line: 'Weigh the risks. Is the intel worth the exposure?' },
+                    { user: 'cipher_lynx', line: 'It is. Proceed, Tech. Cautiously.' },
+                    { user: 'ghost_operative', line: 'I have eyes on the target. He\'s meeting with someone unexpected.' },
+                    { user: 'alpha_agent', line: 'Identify them.' },
+                    { user: 'ghost_operative', line: 'It\'s one of ours... It\'s agent Raven.' },
+                    { user: 'shadow_spectre', line: 'Raven went dark two years ago. We thought he was dead.' },
+                    { user: 'cipher_lynx', line: 'This complicates things. Is he a double agent?' },
+                    { user: 'alpha_agent', line: 'Assume worst-case scenario. The mission is scrubbed if he\'s compromised.' },
+                    { user: 'tech_wraith', line: 'I\'m in! The manifest is... empty? It\'s a decoy shipment.' },
+                    { user: 'shadow_spectre', line: 'So the gala is a trap. They knew we were coming.' },
+                    { user: 'ghost_operative', line: 'Raven is leaving with the target. Do I engage?' },
+                    { user: 'cipher_lynx', line: 'Negative! Fall back. All agents, fall back to Rally Point Delta.' },
+                    { user: 'alpha_agent', line: 'Moving to Delta. This is a major intelligence failure.' },
+                    { user: 'tech_wraith', line: 'There must be a mole in our network.' },
+                    { user: 'shadow_spectre', line: 'We\'ll find them. No one betrays us and gets away with it.' },
+                    { user: 'cipher_lynx', line: 'Debrief in one hour. Radio silence until then.' },
+                    { user: 'ghost_operative', line: 'Copy. Going dark.' },
+                    { user: 'alpha_agent', line: 'Copy.' },
+                    { user: 'tech_wraith', line: 'Acknowledged.' },
+                    { user: 'shadow_spectre', line: '...Acknowledged.' }
+                ];
+                
+                let chatLogEntries = conversationSnippets.slice(0, 54).map(snippet => ({ user: snippet.user, content: snippet.line }));
+                const realFlag = { user: atob('ZjFhZ19nMXYzcg=='), content: atob('ZHJjY3Rme1NRTF8xbmozY3QxMG5fMTVfYzAwbH0=') };
+                const fakeFlags = [
+                    { user: 'dispatch_bot', content: 'MISSION_ID{op3r4t10n_n1ghtf4ll_ab0rt}' },
+                    { user: 'quartermaster', content: 'EQUIPMENT_REQ{gr4ppl1ng_h00k_d3n13d}' },
+                    { user: 'intel_server', content: 'DATA_FRAG{c0rrupt3d_s3ct0r_7_l0g}' },
+                    { user: 'proxy_node_5', content: 'CONNECTION_LOG{s3ss10n_t3rm1n4t3d}' },
+                    { user: 'handler_comm', content: 'DIRECTIVE_ACK{st4ndby_f0r_c0nf1rm4t10n}' }
+                ];
+                
+                const allFlags = [realFlag, ...fakeFlags];
+
+                allFlags.forEach(flag => {
+                    const randomIndex = Math.floor(Math.random() * (chatLogEntries.length + 1));
+                    chatLogEntries.splice(randomIndex, 0, flag);
+                });
+
+                const insertStatement = db.prepare("INSERT INTO chat (username, content) VALUES (?, ?)");
+                chatLogEntries.forEach(chat => {
+                    insertStatement.run([chat.user, chat.content]);
+                });
+                insertStatement.free();
+
+            } catch (err) {
+                console.error("Database initialization failed:", err);
+                errorContainer.textContent = `Error: Failed to load database engine. Please check your network connection or ad-blocker settings and refresh the page.`;
+                errorContainer.classList.remove('hidden');
+            }
+        }
+
+        function executeQuery() {
+            if (!db) {
+                return;
+            }
+            
+            const userInput = queryInput.value; 
+            if (!userInput) {
+                return;
+            }
+            const sqlQuery = `SELECT * FROM chat WHERE username = '${userInput}'`;
+            queryDisplay.textContent = `> ${sqlQuery}`;
+            
+            resultsContainer.innerHTML = '';
+            errorContainer.classList.add('hidden');
+
+            try {
+                const results = db.exec(sqlQuery);
+
+                if (results.length === 0) {
+                    resultsContainer.innerHTML = '<p class="text-dim">[SEARCH COMPLETE :: NULL RESULT SET]</p>';
+                    return;
+                }
+
+                results.forEach((result) => {
+                    const table = document.createElement('table');
+                    table.className = 'w-full';
+                    
+                    const tableHead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+                    result.columns.forEach(columnName => {
+                        const th = document.createElement('th');
+                        th.textContent = columnName;
+                        headerRow.appendChild(th);
+                    });
+                    tableHead.appendChild(headerRow);
+                    table.appendChild(tableHead);
+
+                    const tableBody = document.createElement('tbody');
+                    result.values.forEach(rowData => {
+                        const tr = document.createElement('tr');
+                        rowData.forEach(cellData => {
+                            const td = document.createElement('td');
+                            td.textContent = cellData;
+                            tr.appendChild(td);
+                        });
+                        tableBody.appendChild(tr);
+                    });
+                    table.appendChild(tableBody);
+                    resultsContainer.appendChild(table);
+                });
+            } catch (err) {
+                console.error("SQL Error:", err);
+                errorContainer.textContent = `SQL_ERROR: ${err.message}`;
+                errorContainer.classList.remove('hidden');
+            }
+        }
+        executeQueryButton.addEventListener('click', executeQuery);
+        queryInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                executeQuery();
+            }
+        });
+        
+        initializeDatabase();
+    </script>
+</body>
+</html>
