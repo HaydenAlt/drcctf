@@ -1,1 +1,346 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTF Workshop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* gray-900 */
+            color: #d1d5db; /* gray-300 */
+        }
 
+        .font-mono {
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937; /* gray-800 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; /* gray-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
+        }
+
+        .modal-enter {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        .modal-leave {
+            animation: fadeOut 0.3s ease-in forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); }
+        }
+        
+        .challenge-card.solved {
+            border-color: #10b981; /* emerald-500 */
+            background-color: rgba(16, 185, 129, 0.1);
+            animation: none;
+        }
+        .challenge-card.solved .points {
+            background-color: #10b981;
+            color: #fff;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 5px #f59e0b, 0 0 10px #f59e0b;
+                border-color: #f59e0b; /* amber-500 */
+            }
+            50% {
+                box-shadow: 0 0 10px #fbbf24, 0 0 20px #fbbf24;
+                border-color: #fbbf24; /* amber-400 */
+            }
+        }
+
+        .challenge-card.advanced {
+            animation: pulse-glow 2.5s infinite ease-in-out;
+        }
+
+        #modal-content.advanced-modal {
+            border: 2px solid #f59e0b; /* amber-500 */
+            box-shadow: 0 0 15px #f59e0b;
+        }
+    </style>
+</head>
+<body class="antiasaed">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="flex flex-col sm:flex-row justify-between items-start mb-8">
+            <div class="flex-grow">
+                <h1 class="text-4xl font-bold text-white">CTF Workshop</h1>
+                <p class="text-gray-400 mt-1">View challenges, submit flags, and capture them all!</p>
+            </div>
+            <div class="flex items-center gap-4 mt-4 sm:mt-0">
+                <div class="text-center bg-gray-800 p-4 rounded-lg shadow-md min-w-36">
+                    <div class="text-sm font-medium text-emerald-400">TOTAL SCORE</div>
+                    <div id="total-score" class="text-4xl font-bold text-white">0</div>
+                </div>
+            </div>
+        </header>
+
+        <hr class="border-gray-700 mb-8">
+
+        <main id="challenges-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        </main>
+    </div>
+
+    <div id="challenge-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div id="modal-content" class="bg-gray-800 w-full max-w-2xl rounded-lg shadow-xl text-white transform transition-all">
+        </div>
+    </div>
+
+    <script>
+    // Nice job in finding the JavaScript code!
+	// This part of the code will normally be stored in a remote server, and not accessible here.
+	// This is an exception to save time and resources.
+    
+    const challenges = [
+        { 
+            id: 'crypto-1', 
+            category: 'Cryptography', 
+            title: 'Cyberchef Beginners',
+            description: 'Use Cyberchef to decode this :)<br><code class="bg-gray-900 p-2 rounded block mt-2 text-sm">ZHJjY3Rme3RoMXNfMTVfYjRzM182NH0=</code>',
+            points: 100, 
+            flag: 'drcctf{th1s_15_b4s3_64}', 
+            regex: 'drcctf\\{[a-z0-9_]+\\}'
+        },
+        { 
+            id: 'crypto-2', 
+            category: 'Cryptography', 
+            title: 'Magic!',
+            description: 'This flag looks like it was processed multiple times... Can you find the flag?',
+            points: 100, 
+            links: [ { name: 'Challenge Link', url: 'https://github.com/HaydenAlt/drcctf/blob/main/crypto-2' } ],
+            flag: 'drcctf{th1s_15_1nd33d_m4g1c4l}', 
+            regex: 'drcctf\\{[a-z0-9_]+\\}'
+        },
+        { 
+            id: 'crypto-3', 
+            category: 'Cryptography', 
+            title: 'Supa Easy RSA',
+            description: 'I generated an RSA key pair, and my friend used the public key to encrypt a message. However, I accidentally lost the public key myself! Can I still get the message? Hint: Read the question carefully.',
+            points: 200, 
+            links: [
+                { name: 'Message', url: 'https://github.com/HaydenAlt/drcctf/blob/main/crypto-3.dat' },
+                { name: 'Key', url: 'https://github.com/HaydenAlt/drcctf/blob/main/crypto-3' }
+            ],
+            flag: 'drcctf{1_kn0w_y0u_w1ll_l0s3_th3_publ1c_k3y_l0r}', 
+            regex: 'drcctf\\{[a-z0-9_]+\\}'
+        },
+        { 
+            id: 'forensics-1', 
+            category: 'Forensics', 
+            title: 'Caught in burgers',
+            description: "My friend went to eat at McDonald's alone late at night! He just sent me this picture to flex on me!!! Let's go find him and give him a surprise! (Note that stalking is illegal, and this should not be done in real life.)<br><code class=\"bg-gray-900 p-2 rounded block mt-2 text-sm\">drcctf{Nearest MTR Station, with spaces replaced by underscores(_)}</code>",
+            points: 200, 
+            links: [ { name: 'Image', url: 'https://github.com/HaydenAlt/drcctf/blob/main/%E8%87%AA%E8%82%A5.jpg' } ],
+            flag: 'drcctf{Sha_Tin_Wai}', 
+            regex: 'drcctf\\{[A-Za-z_]+\\}'
+        },
+        { 
+            id: 'misc-1', 
+            category: 'Misc', 
+            title: 'Go back in time',
+            description: 'You and your friends have just been assigned a task to write an anniversary theme song for the school. You decided to get inspirations from the 30th Anniversary theme song, however, it is not in the Google search results. You must go back in time. Wait what? Go back in time?<br><code class="bg-gray-900 p-2 rounded block mt-2 text-sm">Flag Format: drcctf{Song Name}</code>',
+            points: 100, 
+            flag: 'drcctf{美麗新一天}', 
+            regex: 'drcctf\\{[^}]+\\}'
+        },
+        {
+            id: 'web-1',
+            category: 'Web',
+            title: 'Sector 7G',
+            description: 'Hello agent. We have gained access to the chat of our enemy\'s top-secret agent group, Sector 7G. Help us retrieve the flag.',
+            points: 200,
+            links: [ { name: 'Challenge Link', url: 'https://haydenalt.github.io/drcctf/web' } ],
+            flag: 'drcctf{SQL_1nj3ct10n_15_c00l}',
+            regex: 'drcctf\\{[A-Z_a-z0-9]+\\}'
+        },
+        {
+            id: 'reverse-1',
+            category: 'Reverse Engineering',
+            title: 'Python Reverse',
+            description: '<code class="bg-gray-900 p-2 rounded block mt-2 text-sm">Result: }ta1fhsa0p_gho_lf43{sgppeq</code>',
+            points: 300,
+            links: [ { name: 'Python Script', url: 'https://github.com/HaydenAlt/drcctf/blob/main/reverse.py' } ],
+            flag: 'drcctf{34sy_but_c0nfus1ng}',
+            regex: 'drcctf\\{[a-z0-9_]+\\}',
+            advanced: true
+        }
+    ];
+
+    let state = {
+        solvedChallenges: [],
+    };
+    
+    const challengesGrid = document.getElementById('challenges-grid');
+    const totalScoreEl = document.getElementById('total-score');
+    const modal = document.getElementById('challenge-modal');
+    const modalContent = document.getElementById('modal-content');
+    const STORAGE_KEY = 'ctf_workshop_progress';
+
+    function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function loadState() {
+        const savedState = localStorage.getItem(STORAGE_KEY);
+        if (savedState) {
+            const parsedState = JSON.parse(savedState);
+            state.solvedChallenges = parsedState.solvedChallenges || [];
+        }
+    }
+
+    function renderScore() {
+        const score = state.solvedChallenges.reduce((acc, challengeId) => {
+            const challenge = challenges.find(c => c.id === challengeId);
+            return acc + (challenge ? challenge.points : 0);
+        }, 0);
+        totalScoreEl.textContent = score;
+    }
+
+    function renderChallenges() {
+        challengesGrid.innerHTML = challenges.map(challenge => {
+            const isSolved = state.solvedChallenges.includes(challenge.id);
+            const isAdvanced = challenge.advanced;
+            return `
+                <div class="challenge-card ${isSolved ? 'solved' : ''} ${isAdvanced && !isSolved ? 'advanced' : ''} bg-gray-800 p-4 rounded-lg shadow-lg cursor-pointer transition-all duration-200 hover:transform hover:-translate-y-1 border-2 border-transparent hover:border-emerald-500 flex flex-col justify-between"
+                    onclick="showModal('${challenge.id}')" data-challenge-id="${challenge.id}">
+                    <div>
+                        <div class="text-sm text-gray-400">${challenge.category}</div>
+                        <h3 class="text-lg font-bold text-white mt-1">${challenge.title}</h3>
+                    </div>
+                    <div class="points mt-4 text-center text-emerald-400 bg-gray-700 rounded-full py-1 px-3 text-lg font-bold self-start">
+                        ${challenge.points}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    function renderModal(challengeId) {
+        const challenge = challenges.find(c => c.id === challengeId);
+        if (!challenge) return;
+
+        if (challenge.advanced && !state.solvedChallenges.includes(challengeId)) {
+            modalContent.classList.add('advanced-modal');
+        } else {
+            modalContent.classList.remove('advanced-modal');
+        }
+
+        const isSolved = state.solvedChallenges.includes(challenge.id);
+        
+        let linksHtml = '';
+        if (challenge.links && challenge.links.length > 0) {
+            linksHtml = challenge.links.map(link => 
+                `<a href="${link.url}" target="_blank" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200 mt-2 mr-2">${link.name}</a>`
+            ).join('');
+        }
+
+        modalContent.innerHTML = `
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="text-sm text-gray-400">${challenge.category}</span>
+                        <h2 class="text-3xl font-bold text-white">${challenge.title}</h2>
+                    </div>
+                    <div class="text-2xl font-bold text-emerald-400 bg-gray-700 rounded-full py-2 px-4">${challenge.points} pts</div>
+                </div>
+                <div class="prose prose-invert max-w-none text-gray-300 mb-6"><p>${challenge.description}</p></div>
+                ${linksHtml ? `<div class="mb-6">${linksHtml}</div>` : ''}
+                <div class="bg-gray-900 p-4 rounded-lg mb-6">
+                    <h4 class="font-semibold text-gray-400 mb-1">Flag Format:</h4>
+                    <p class="font-mono text-emerald-400 text-sm">${challenge.regex}</p>
+                </div>
+                <div id="submission-result" class="mb-4 text-center"></div>
+                ${isSolved ? 
+                `<div class="text-center p-4 bg-emerald-900 text-emerald-300 rounded-lg"><strong class="text-lg">Challenge Solved!</strong></div>` :
+                `<form id="flag-form" onsubmit="submitFlag(event, '${challenge.id}')">
+                    <div class="flex gap-2">
+                        <input id="flag-input" type="text" placeholder="Enter flag: drcctf{...}" class="flex-grow bg-gray-900 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Submit</button>
+                    </div>
+                 </form>`
+                }
+            </div>
+            <button onclick="hideModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">&times;</button>
+        `;
+    }
+
+    function showModal(challengeId) {
+        renderModal(challengeId);
+        modal.classList.remove('hidden');
+        modalContent.parentElement.classList.add('modal-enter');
+        modalContent.parentElement.classList.remove('modal-leave');
+    }
+
+    function hideModal() {
+        modalContent.parentElement.classList.add('modal-leave');
+        modalContent.parentElement.classList.remove('modal-enter');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    function submitFlag(event, challengeId) {
+        event.preventDefault();
+        const flagInput = document.getElementById('flag-input');
+        const submittedFlag = flagInput.value.trim();
+        const challenge = challenges.find(c => c.id === challengeId);
+        const resultEl = document.getElementById('submission-result');
+
+        if (!challenge) return;
+
+        if (submittedFlag === challenge.flag) {
+            resultEl.innerHTML = `<p class="text-emerald-400 font-bold">Correct! Well done!</p>`;
+            if (!state.solvedChallenges.includes(challengeId)) {
+                state.solvedChallenges.push(challengeId);
+                saveState();
+                renderChallenges();
+                renderScore();
+            }
+            setTimeout(() => { hideModal(); }, 1500);
+        } else {
+            resultEl.innerHTML = `<p class="text-red-400 font-bold">Incorrect flag. Try again!</p>`;
+            flagInput.classList.add('border-red-500');
+            flagInput.focus();
+            setTimeout(() => {
+                flagInput.classList.remove('border-red-500');
+                resultEl.innerHTML = '';
+            }, 2000);
+        }
+    }
+    
+    function init() {
+        loadState();
+        renderChallenges();
+        renderScore();
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) hideModal();
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) hideModal();
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
